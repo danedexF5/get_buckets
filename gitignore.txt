@@ -1,0 +1,30 @@
+# R specific
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# Shiny token
+*-auth
+rsconnect/
+
+# Cached data
+data/cache/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Editor specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.Renviron
