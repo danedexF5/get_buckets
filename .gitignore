@@ -28,3 +28,6 @@ Thumbs.db
 # Environment variables
 .env
 .Renviron
+
+.Rapp.history
+.Renviron.rtf
