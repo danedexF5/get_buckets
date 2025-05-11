@@ -3,7 +3,7 @@
 ## Overview
 This application displays the top 25 NBA scorers by points per game (PPG) for any selected season. The app uses real-time data fetched from the NBA.com Stats API through the NBA_API Python package, integrated with R Shiny via the reticulate package.
 
-![NBA Top Scorers App Screenshot](https://placeholder-for-your-screenshot.com)
+![NBA Top Scorers App Screenshot](https://raw.githubusercontent.com/danedexF5/get_buckets/fc1aad99f5eb408abfb5f50e96afeafe927f36df/top_scorers_group.png)
 
 ## Features
 - View the top 25 NBA scoring leaders by PPG for seasons from 1996-97 onwards
