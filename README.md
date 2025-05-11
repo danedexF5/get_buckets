@@ -1,129 +1,164 @@
-# NBA Top Scorers App: Get Buckets
+# NBA Top Scorers App
 
-This is a web application built with R and Shiny that allows users to explore the top NBA scorers (by points per game) for any season since 1946.
+## Overview
+This application displays the top 25 NBA scorers by points per game (PPG) for any selected season. The app uses real-time data fetched from the NBA.com Stats API through the NBA_API Python package, integrated with R Shiny via the reticulate package.
 
-![NBA Top Scorers App Screenshot](app_screenshot.jpg)
+![NBA Top Scorers App Screenshot](https://placeholder-for-your-screenshot.com)
 
 ## Features
+- View the top 25 NBA scoring leaders by PPG for seasons from 1996-97 onwards
+- Interactive visualization of scoring statistics
+- Detailed player information including team, games played, and minutes per game
+- Modern, responsive UI built with shinydashboard
+- Data caching to improve performance and reduce API calls
+- Downloadable results in CSV format
 
-- View the top 25 NBA scorers by points per game (PPG) for any season
-- Interactive visualization of scoring distribution
-- Download results as CSV
-- Responsive design that works on desktop and mobile
-- Data caching for improved performance
+## Technical Details
 
-## Requirements
+### API Integration
+The app integrates with the NBA.com Stats API using the following approach:
 
-- R 4.0.0 or higher
-- The following R packages:
-  - shiny
-  - shinydashboard
-  - DT
-  - dplyr
-  - plotly
-  - httr
-  - jsonlite
+**Python NBA_API Package**: We use the `nba_api` Python package to access official NBA statistics directly from NBA.com's Stats API
+   
+Python code used through reticulate
+   nba\_api.stats.endpoints.LeagueLeaders(
+       season = "2022-23",`[]()`
+       stat\_category\_abbreviation = "PTS",
+       per\_mode48 = "PerGame",
+       season\_type\_all\_star = "Regular Season"
+   )
 
-## Installation
+**Reticulate Integration**: The R package reticulate bridges R and Python, allowing seamless API access
 
-1. Clone this repository:
-   ```
-   git clone https://github.com/yourusername/nba-stats-app.git
-   cd nba-stats-app
-   ```
+# R code to call Python functions
+league\_leaders <- nba_api$LeagueLeaders(
+  season = season,
+  stat\_category\_abbreviation = "PTS",
+  per\_mode48 = "PerGame",
+  season\_type\_all\_star = "Regular Season"
+)
 
-2. Install the required R packages:
-   ```R
-   install.packages(c("shiny", "shinydashboard", "DT", "dplyr", "plotly", "httr", "jsonlite"))
-   ```
+**Data Processing**: Raw API data is cleaned and formatted in R for display
 
-3. Run the app:
-   ```R
-   shiny::runApp()
-   ```
+# Process API response into a clean data frame
+top\_scorers <- leaders\_df %>%
+  filter(GP >= 20) %>%
+  mutate(
+    player\_name = PLAYER,
+    team = TEAM,
+    ppg = PTS,
+    games\_played = GP,
+    mpg = MIN
+  ) %>%
+  select(player\_name, team, ppg, games\_played, mpg) %>%
+  arrange(desc(ppg)) %>%
+  head(num\_players)
 
-## Usage
+**Caching**: Results are cached to improve performance and reduce API calls
 
-1. Enter a year in the input field (1946 to present)
+**App Structure**
+The application is organized into modular components:
+
+* main-app.r: Core Shiny application that defines the UI and server logic
+* api-functions.r: Functions for making API calls and processing NBA data
+* helper-functions.r: Utility functions for data formatting and visualization
+* css-styles.css: Custom styling for the application
+* js-scripts.js: Client-side JavaScript for enhanced interactivity
+	
+### Installation and Deployment
+**Prerequisites**
+
+* R 4.0.0 or higher
+* Python 3.7 or higher
+
+**Required R packages:**
+
+install.packages(c("shiny", "shinydashboard", "DT", "dplyr", "plotly", "reticulate"))
+
+**Required Python packages:**
+
+pip install nba_api pandas
+
+**Local Development**
+
+- Clone this repository:
+
+git clone https://github.com/yourusername/get\_buckets.git
+cd get\_buckets
+
+- Open the project in RStudio or your preferred R environment
+- Run the app locally:
+
+shiny::runApp()
+
+###Deployment to shinyapps.io
+
+- Install the rsconnect package if you haven't already:
+
+install.packages("rsconnect")
+
+- Set up your shinyapps.io account:
+
+rsconnect::setAccountInfo(
+  name = "YOUR\_ACCOUNT\_NAME",
+  token = "YOUR\_TOKEN",
+  secret = "YOUR\_SECRET"
+)
+
+- Deploy using the deployment script:
+
+source("deploy\_nba\_api\_reticulate.R")
+
+- The script will create an app directory and deploy it to shinyapps.io
+- Visit your deployed app at https://yourusername.shinyapps.io/get\_buckets/
+
+### Usage
+
+1. Select a season from the dropdown menu
 2. Click the "Get Top Scorers" button
-3. View the results table and visualization
-4. Download the data as CSV if needed
+3. View the top 25 scorers and their statistics
+4. Explore the interactive visualization
+5. Download the data as a CSV if needed
 
-## API Information
+### Testing
 
-This app uses the following APIs:
-- Primary: balldontlie.io API (free, but with rate limits)
-- Backup: NBA Stats API (unofficial)
+Utilized Postman to test different endpoints and parameters. The below example returned a 200. Originally the ActiveFlag parameter was included but kept throwing an error so it was taken out.
 
-Data is cached locally to respect API rate limits and improve performance.
+**Example of headers used (required by NBA.com):**
 
-## Project Structure
+Accept:application/json, text/plain, */*
+Accept-Language:en-US,en;q=0.9
+Host:stats.nba.com
+Origin:https://www.nba.com
+Referer:https://www.nba.com/
+User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36
+x-nba-stats-origin:stats
+x-nba-stats-token:true
 
-```
-nba-stats-app/
-│
-├── R/
-│   ├── app.R                # Main Shiny app
-│   ├── api_functions.R      # Functions for API calls
-│   └── helpers.R            # Helper functions
-│
-├── data/
-│   └── cache/               # Cache directory for API responses
-│
-├── www/
-│   ├── styles.css           # Custom CSS
-│   ├── scripts.js           # Custom JavaScript
-│   └── favicon.ico          # App icon
-│
-├── .gitignore               # Git ignore file
-├── README.md                # This file
-└── nba-stats-app.Rproj      # RStudio project file
-```
+**Example of parameters used:**
 
-## Deployment
+LeagueID:00
+PerMode:PerGame
+Scope:S
+Season:2022-23
+SeasonType:Regular Season
+StatCategory:PTS
 
-This app can be deployed to:
+### Acknowledgments
 
-- [shinyapps.io](https://www.shinyapps.io/): The easiest option for hosting Shiny apps
-- Your own Shiny Server
-- Docker container
+* NBA\_API for providing access to NBA.com Stats
+* Shiny for the web application framework
+* R reticulate for R-Python integration
+* Claude for a heavy lift
+* Wife for advice on R, Python, industry standards
 
-### Deploying to shinyapps.io
-
-1. Install the rsconnect package:
-   ```R
-   install.packages("rsconnect")
-   ```
-
-2. Set up your shinyapps.io account:
-   ```R
-   rsconnect::setAccountInfo(name="YOUR_ACCOUNT", token="YOUR_TOKEN", secret="YOUR_SECRET")
-   ```
-
-3. Deploy the app:
-   ```R
-   rsconnect::deployApp()
-   ```
-
-## Customization
-
-- Change the color scheme by modifying `www/styles.css`
-- Adjust the number of players displayed by modifying the `num_players` parameter in `R/api_functions.R`
-- Add additional visualizations by editing the app.R file
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
+**License**
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Acknowledgments
+**Contact**
 
-- [balldontlie.io](https://www.balldontlie.io/) for providing the free NBA API
-- The R and Shiny communities for their excellent packages
+dane.dexheimer@gmail.com
+
+Project Link: https://github.com/danedexF5/get_buckets
+
+
